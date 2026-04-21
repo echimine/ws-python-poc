@@ -4,6 +4,9 @@ from types import SimpleNamespace
 from pathlib import Path
 import subprocess
 import json
+import base64
+import tempfile
+import os
 from nl_to_code.nl_to_code import execute_code_from
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -152,13 +155,42 @@ def main():
             return
 
         #print("receiver", message.value)
-        # print("receiver", message.sensor_id)
+        #print("receiver", message.emitter)
 
         sensor_id = message.sensor_id
         value = message.value
 
-        if message.emitter == "MY_APP":
-            print(message.value + "vue by my app")
+        if message.emitter == "MON_APP":
+            if message.message_type == MessageType.RECEPTION.IMAGE and isinstance(value, str) and value.startswith("IMG:"):
+                img_b64 = value[4:]
+                with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+                    tmp.write(base64.b64decode(img_b64))
+                    tmp_path = tmp.name
+                try:
+                    result = subprocess.run(
+                        [
+                            "python3", "-m", "mlx_vlm", "generate",
+                            "--model", "mlx-community/gemma-4-e4b-it-4bit",
+                            "--image", tmp_path,
+                            "--prompt", "Décris cette image en détail en français",
+                            "--max-tokens", "300"
+                        ],
+                        capture_output=True, text=True
+                    )
+                    parts = result.stdout.split("==========")
+                    if len(parts) >= 2:
+                        block = parts[1]
+                        marker = "<|turn>model\n\n"
+                        idx = block.find(marker)
+                        if idx != -1:
+                            generated = block[idx + len(marker):].strip()
+                            first_sentence = generated.split("\n")[0].strip()
+                            print(first_sentence)
+                            subprocess.run(["say", "-v", "Thomas", first_sentence])
+                    else:
+                        print(result.stdout)
+                finally:
+                    os.unlink(tmp_path)
             return
         
 

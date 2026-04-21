@@ -42,3 +42,8 @@ Persistent memory lives in `nl_to_code/current_state_memory.md`, a markdown file
 ### Message Flow
 
 ESP32 sends sensor data → `WSClient.on_message()` → `main.py` handler → writes to memory / broadcasts temperature string / triggers NL processing for user commands.
+
+mlx_vlm.generate \
+ --model mlx-community/gemma-4-e4b-it-4bit \
+ --image /Users/eliott/Downloads/image-de-souris.jpg \
+ --prompt "Décris cette image en détail en français"
