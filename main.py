@@ -184,6 +184,7 @@ def main():
                         idx = block.find(marker)
                         if idx != -1:
                             generated = block[idx + len(marker):].strip()
+                            print(generated)
                             first_sentence = generated.split("\n")[0].strip()
                             print(first_sentence)
                             subprocess.run(["say", "-v", "Thomas", first_sentence])
