@@ -172,12 +172,13 @@ def main():
                             "python3", "-m", "mlx_vlm", "generate",
                             "--model", "mlx-community/gemma-4-e4b-it-4bit",
                             "--image", tmp_path,
-                            "--prompt", "Décris cette image en détail en français",
+                            "--prompt", "je veux que tu detecte l'etat de l'aliment, regarde si il y a des points noirs ou si la couleur est différente de l'aliment connue. Je veux que tu renvoie une phrase disant si il peut manger l'aliment ou pas et explique pourquoi. Je veux que tu renvoie la réponse avec une seul phrase en étant affirmatif",
                             "--max-tokens", "300"
                         ],
                         capture_output=True, text=True
                     )
                     parts = result.stdout.split("==========")
+                    print(result.stdout)
                     if len(parts) >= 2:
                         block = parts[1]
                         marker = "<|turn>model\n\n"
@@ -186,7 +187,7 @@ def main():
                             generated = block[idx + len(marker):].strip()
                             print(generated)
                             first_sentence = generated.split("\n")[0].strip()
-                            print(first_sentence)
+                            
                             subprocess.run(["say", "-v", "Thomas", first_sentence])
                     else:
                         print(result.stdout)
